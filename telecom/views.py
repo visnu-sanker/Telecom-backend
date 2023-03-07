@@ -2,7 +2,7 @@ from django.shortcuts import render
 from rest_framework.views import APIView
 from rest_framework.response import Response
 from rest_framework.exceptions import AuthenticationFailed
-from .serializers import UserSerializer
+from .serializers import UserSerializer, PlanSerializer
 from .models import User
 import jwt, datetime
 
@@ -41,7 +41,11 @@ class LoginView(APIView):
 
         response.set_cookie(key='jwt', value=token, httponly=True)
         response.data = {
-            'jwt': token
+            'jwt': token,
+            # 'userId':user.id,
+            'userName':user.username,
+            'userEmail':user.email,
+            'plan':user.first_name
         }
         return response
 
@@ -53,3 +57,10 @@ class LogoutView(APIView):
             'message': 'success'
         }
         return response
+
+class PlanView(APIView):
+    def post(self, request):
+        serializer = PlanSerializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
+        serializer.save()
+        return Response(serializer.data)
